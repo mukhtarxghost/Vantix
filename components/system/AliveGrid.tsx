@@ -47,7 +47,6 @@ export default function AliveGrid() {
     const cursorGrid = cursorGridRef.current;
     let raf = 0;
     let scrollY = 0;
-    let time = 0;
     let bgX = 0;
     let bgY = 0;
     let targetBgX = 0;
@@ -57,13 +56,11 @@ export default function AliveGrid() {
       scrollY = window.scrollY;
     };
 
-    const tick = (now: number) => {
-      time = now * 0.001;
-      const breathe = 0.055 + Math.sin(time * 0.45) * 0.012;
-
+    const tick = () => {
+      // Steady full grid — match locked reference look.
       if (grid) {
         const parallaxY = scrollY * 0.018;
-        grid.style.opacity = String(breathe);
+        grid.style.opacity = "1";
         grid.style.transform = `translate3d(0, ${parallaxY}px, 0)`;
       }
 
@@ -157,6 +154,7 @@ export default function AliveGrid() {
   return (
     <div className="alive-grid-root" aria-hidden="true">
       <div ref={gridRef} className="alive-grid-base" />
+      <div className="alive-grid-beam" />
       <div ref={cursorGridRef} className="alive-grid-cursor" />
       <div ref={sweepRef} className="alive-grid-sweep" />
       <div ref={pulseHRef} className="alive-grid-pulse alive-grid-pulse-h" />

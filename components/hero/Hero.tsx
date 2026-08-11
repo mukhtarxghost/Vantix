@@ -8,9 +8,9 @@ import HeroOrb from "@/components/ui/HeroOrb";
 import { LM_EASE, LM_STAGGER } from "@/lib/motion";
 
 const SYSTEM_LABELS = [
+  "OPERATIONS",
   "AUTOMATION",
   "SYSTEMS",
-  "OPERATIONS",
   "DEPLOYMENT",
   "INTEGRATION",
 ];
@@ -181,21 +181,27 @@ export default function Hero() {
       className="section-motion relative flex min-h-[100svh] flex-col overflow-hidden border-b border-white/10 px-5 pb-8 pt-28 md:px-8 md:pb-10"
     >
       <div
-        className="hero-top-vignette pointer-events-none absolute inset-x-0 top-0 h-[280px]"
+        className="hero-top-vignette pointer-events-none absolute inset-x-0 top-0 h-full"
         aria-hidden="true"
       />
+      <div className="hero-light-beam pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <div
         ref={orbWrapRef}
-        className="hero-orb-container pointer-events-none relative mx-auto mt-4 flex flex-1 items-center justify-center md:mt-0"
+        className="hero-orb-container pointer-events-none relative z-[1] mx-auto mt-4 flex flex-1 flex-col items-center justify-center md:mt-0"
         aria-hidden="true"
       >
-        <HeroOrb className="h-[min(52vw,380px)] w-[min(52vw,380px)] md:h-[min(36vw,420px)] md:w-[min(36vw,420px)]" />
-        <div className="hero-ring-label">
+        <HeroOrb>
           <span className="hero-ring-label-kicker">Active</span>
           <span ref={labelRef} className="hero-ring-label-word">
-            AUTOMATION
+            OPERATIONS
           </span>
+        </HeroOrb>
+        <div className="hero-scroll-cue pointer-events-none mt-8 flex flex-col items-center gap-2">
+          <span className="text-[9px] uppercase tracking-[0.28em] text-white/30">
+            Scroll
+          </span>
+          <span className="hero-scroll-line" />
         </div>
       </div>
 
@@ -227,7 +233,7 @@ export default function Hero() {
                   <span className="hero-line-inner block">WE BUILD</span>
                 </div>
                 <div className="hero-line overflow-hidden text-white/35">
-                  <span className="hero-line-inner hero-line-accent block italic">
+                  <span className="hero-line-inner hero-line-accent block">
                     SYSTEMS
                   </span>
                 </div>
@@ -255,12 +261,6 @@ export default function Hero() {
           </a>
         </div>
 
-        <div className="hero-fade hero-scroll-cue pointer-events-none absolute -top-16 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex">
-          <span className="text-[9px] uppercase tracking-[0.28em] text-white/25">
-            Scroll
-          </span>
-          <span className="hero-scroll-line" />
-        </div>
       </div>
     </section>
   );

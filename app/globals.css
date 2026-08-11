@@ -57,10 +57,33 @@ button {
   position: absolute;
   inset: -4%;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.085) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.085) 1px, transparent 1px);
   background-size: 80px 80px;
-  will-change: transform, opacity;
+  will-change: transform;
+}
+
+/* Center column — grid brightens under the hero light beam */
+.alive-grid-beam {
+  position: absolute;
+  inset: -4%;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 80px 80px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 34% 92% at 50% 32%,
+    black 0%,
+    rgba(0, 0, 0, 0.55) 42%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 34% 92% at 50% 32%,
+    black 0%,
+    rgba(0, 0, 0, 0.55) 42%,
+    transparent 78%
+  );
+  pointer-events: none;
 }
 
 .alive-grid-cursor {
@@ -127,17 +150,102 @@ button {
 
 .hero-top-vignette {
   background: radial-gradient(
-    ellipse 55% 100% at 50% 0%,
-    rgba(255, 255, 255, 0.07) 0%,
-    transparent 78%
+    ellipse 38% 95% at 50% 24%,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 36%,
+    transparent 72%
   );
-  opacity: 0.55;
+  opacity: 1;
+}
+
+.hero-light-beam {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 30% 88% at 50% 30%,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.035) 40%,
+    transparent 72%
+  );
+  pointer-events: none;
 }
 
 .hero-orb-container {
   position: relative;
   transform-origin: center center;
-  min-height: min(52vw, 380px);
+  min-height: min(62vh, 580px);
+  width: 100%;
+}
+
+.hero-radar-stage {
+  position: relative;
+  display: block;
+  width: min(94vw, 980px);
+  height: min(62vh, 580px);
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+.hero-radar-parallax {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-radar-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-radar-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero-radar-hud-item {
+  position: absolute;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.hero-radar-hud-tl {
+  top: 12px;
+  left: 16px;
+}
+
+.hero-radar-hud-tr {
+  top: 12px;
+  right: 16px;
+}
+
+.hero-radar-hud-bl {
+  bottom: 12px;
+  left: 16px;
+}
+
+.hero-radar-hud-br {
+  bottom: 12px;
+  right: 16px;
+}
+
+.hero-orb-scene {
+  position: relative;
+  display: block;
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+}
+
+.hero-orb-tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(58deg);
+  will-change: transform;
 }
 
 .hero-orb-wrap {
@@ -149,6 +257,7 @@ button {
   display: block;
   width: 100%;
   height: 100%;
+  transform: translateZ(24px);
 }
 
 .scroll-progress-bar {
@@ -511,29 +620,35 @@ button {
 
 .hero-ring-label {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 46%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   pointer-events: none;
   text-align: center;
+  transform: translate(-50%, -50%);
 }
 
 .hero-ring-label-kicker {
   font-size: 0.62rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .hero-ring-label-word {
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 2vw, 1.15rem);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow:
+    0 0 32px rgba(255, 255, 255, 0.45),
+    0 0 8px rgba(255, 255, 255, 0.25),
+    0 2px 16px rgba(0, 0, 0, 0.5);
 }
 
 .hero-stage {
@@ -569,7 +684,9 @@ button {
 }
 
 .hero-line-accent {
-  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.38);
+  paint-order: stroke fill;
   letter-spacing: -0.04em;
 }
 
@@ -756,6 +873,10 @@ button {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
+  }
+
+  .hero-radar-parallax {
+    transform: none !important;
   }
 
   .hero-ambient-glow,
