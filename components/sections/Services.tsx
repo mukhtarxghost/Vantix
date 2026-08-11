@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { gsap } from "@/lib/gsap";
+import { useMotion } from "@/components/system/MotionContext";
+import { useSectionActive } from "@/hooks/useSectionActive";
+import SectionAmbient from "@/components/ui/SectionAmbient";
 
 const services = [
   {
@@ -43,17 +47,55 @@ const services = [
 
 export default function Services() {
   const [active, setActive] = useState(0);
+  const { ref: sectionRef, active: sectionActive } = useSectionActive();
+  const { reducedMotion } = useMotion();
+  const activatedRef = useRef(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    section.classList.toggle("is-section-active", sectionActive);
+  }, [sectionActive, sectionRef]);
+
+  useEffect(() => {
+    if (!sectionActive || activatedRef.current || reducedMotion) return;
+    activatedRef.current = true;
+
+    const rows = sectionRef.current?.querySelectorAll(".service-row");
+    if (!rows?.length) return;
+
+    sectionRef.current?.setAttribute("data-activated", "true");
+
+    gsap.fromTo(
+      rows,
+      { opacity: 0, x: -12 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: "power3.out",
+      }
+    );
+  }, [sectionActive, reducedMotion, sectionRef]);
 
   return (
     <section
-      id="solutions"
-      className="relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
+      ref={sectionRef}
+      id="services"
+      data-activated={reducedMotion ? "true" : "false"}
+      className="section-motion relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+      <SectionAmbient
+        position="right"
+        showRing
+        cycleLabels={["VOICE", "WHATSAPP", "CRM", "API"]}
+      />
 
-      <div className="relative mx-auto max-w-[1600px]">
-        {/* Header */}
-        <div className="mb-20 flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="legacy-section-grid pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+
+      <div className="section-inner relative mx-auto max-w-[1600px]">
+        <div className="section-header-bar section-fade mb-20 flex items-center justify-between border-b border-white/10 pb-4">
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
             02 / Solutions
           </span>
@@ -65,15 +107,18 @@ export default function Services() {
 
         {/* Intro */}
         <div className="mb-20 grid gap-10 md:grid-cols-[1fr_0.5fr]">
-          <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.82] tracking-[-0.07em]">
-            AUTOMATE
-            <br />
-            <span className="text-white/30">WHAT</span>
-            <br />
-            MATTERS.
+          <h2
+            id="services-heading"
+            className="display-heading text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.82] tracking-[-0.07em]"
+          >
+            <span className="services-line display-line">AUTOMATE</span>
+            <span className="services-line display-line grey-word text-white/30">
+              WHAT
+            </span>
+            <span className="services-line display-line">MATTERS.</span>
           </h2>
 
-          <div className="flex items-end">
+          <div className="section-fade flex items-end">
             <p className="max-w-sm text-sm leading-6 text-white/45">
               We combine AI, APIs, messaging, databases, and workflow
               automation to turn manual processes into systems that run.
@@ -92,7 +137,7 @@ export default function Services() {
                 type="button"
                 onMouseEnter={() => setActive(index)}
                 onFocus={() => setActive(index)}
-                className="group block w-full border-b border-white/10 text-left"
+                className="service-row group block w-full border-b border-white/10 text-left"
               >
                 <div
                   className={`grid transition-all duration-500 md:grid-cols-[80px_1fr_1fr_80px] md:items-center ${
@@ -183,7 +228,7 @@ export default function Services() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+        <div className="section-fade mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <span className="text-[9px] uppercase tracking-[0.18em] text-white/25">
             No two systems are built the same.
           </span>

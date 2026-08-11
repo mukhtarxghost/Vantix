@@ -10,9 +10,9 @@ const links = [
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden px-5 pb-6 pt-16 md:px-8 md:pt-24">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:80px_80px]" />
+      <div className="legacy-section-grid pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:80px_80px]" />
 
-      <div className="relative mx-auto max-w-[1600px]">
+      <div className="site-footer-inner relative mx-auto max-w-[1600px]">
         {/* Top */}
         <div className="grid border-y border-white/10 md:grid-cols-[1fr_0.5fr]">
           <div className="border-b border-white/10 p-6 md:border-b-0 md:border-r md:p-8">

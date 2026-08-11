@@ -1,5 +1,21 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { gsap } from "@/lib/gsap";
+import { useMotion } from "@/components/system/MotionContext";
+import { useSectionActive } from "@/hooks/useSectionActive";
+import SectionAmbient from "@/components/ui/SectionAmbient";
+import VerbTicker from "@/components/ui/VerbTicker";
+import SystemConsole from "@/components/ui/SystemConsole";
+
+const automationVerbs = [
+  { word: "CAPTURES", detail: "Incoming requests" },
+  { word: "ROUTES", detail: "To the right workflow" },
+  { word: "QUALIFIES", detail: "Every lead" },
+  { word: "EXECUTES", detail: "Without manual delay" },
+  { word: "REPORTS", detail: "System status" },
+];
+
 const nodes = [
   { id: "01", label: "INCOMING LEAD", x: "8%", y: "50%" },
   { id: "02", label: "AI AGENT", x: "32%", y: "50%" },
@@ -10,17 +26,83 @@ const nodes = [
 ];
 
 export default function Workflow() {
+  const { ref: sectionRef, active: sectionActive } = useSectionActive();
+  const { reducedMotion } = useMotion();
+  const bootedRef = useRef(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    section.classList.toggle("is-section-active", sectionActive);
+  }, [sectionActive, sectionRef]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      const section = sectionRef.current;
+      section?.classList.add("is-booted");
+      section?.setAttribute("data-booted", "true");
+      return;
+    }
+
+    if (!sectionActive || bootedRef.current) return;
+    bootedRef.current = true;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const nodeEls = section.querySelectorAll(".workflow-node");
+    const paths = section.querySelectorAll(".workflow-path");
+
+    gsap.set(nodeEls, { opacity: 0, scale: 0.96 });
+    gsap.set(paths, { strokeDashoffset: 400, opacity: 0.4 });
+
+    paths.forEach((path) => {
+      const length = (path as SVGPathElement).getTotalLength?.() ?? 400;
+      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+    });
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        section.classList.add("is-booted");
+        section.setAttribute("data-booted", "true");
+      },
+    });
+
+    nodeEls.forEach((node, i) => {
+      tl.to(
+        node,
+        { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" },
+        i * 0.18
+      );
+    });
+
+    paths.forEach((path, i) => {
+      tl.to(
+        path,
+        { strokeDashoffset: 0, opacity: 1, duration: 0.6, ease: "power1.inOut" },
+        i * 0.1
+      );
+    });
+  }, [sectionActive, reducedMotion, sectionRef]);
+
   return (
     <section
+      ref={sectionRef}
       id="systems"
-      className="relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
+      data-booted={reducedMotion ? "true" : "false"}
+      className="section-motion relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
     >
-      {/* Grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+      <SectionAmbient
+        position="left"
+        showRing
+        cycleLabels={["ROUTING", "PROCESSING", "EXECUTING", "ONLINE"]}
+      />
 
-      <div className="relative mx-auto max-w-[1600px]">
+      <div className="legacy-section-grid pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+
+      <div className="section-inner relative mx-auto max-w-[1600px]">
         {/* Header */}
-        <div className="mb-20 flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="section-header-bar section-fade mb-20 flex items-center justify-between border-b border-white/10 pb-4">
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
             01 / Systems
           </span>
@@ -31,22 +113,25 @@ export default function Workflow() {
         </div>
 
         {/* Statement */}
-        <div className="mb-24">
+        <div className="section-fade mb-24">
           <p className="mb-6 text-xs uppercase tracking-[0.2em] text-white/40">
             What we build
           </p>
 
-          <h2 className="max-w-[1100px] text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.82] tracking-[-0.07em]">
-            BUSINESS
-            <br />
-            <span className="text-white/30">WITHOUT</span>
-            <br />
-            THE BUSYWORK.
+          <h2 className="display-heading max-w-[1100px] text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.82] tracking-[-0.07em]">
+            <span className="display-line">BUSINESS</span>
+            <span className="display-line grey-word text-white/30">WITHOUT</span>
+            <span className="display-line">THE BUSYWORK.</span>
           </h2>
         </div>
 
+        <div className="section-fade mb-12 grid gap-6 md:grid-cols-[240px_1fr] md:items-start">
+          <VerbTicker verbs={automationVerbs} />
+          <SystemConsole />
+        </div>
+
         {/* System */}
-        <div className="border border-white/10 bg-white/[0.015]">
+        <div className="workflow-engine border border-white/10 bg-white/[0.015]">
           {/* System Header */}
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <span className="text-[10px] uppercase tracking-[0.18em] text-white/40">
@@ -106,28 +191,30 @@ export default function Workflow() {
                   fill="none"
                 />
 
-                {/* Upper branch */}
+                <path
+                  id="flow-backbone"
+                  d="M 232 280 L 408 280"
+                  fill="none"
+                />
+
                 <path
                   id="flow-upper"
-                  d="M 408 280 L 560 140"
+                  d="M 408 280 L 472 280 L 472 140 L 560 140"
                   fill="none"
                 />
 
-                {/* Lower branch */}
                 <path
                   id="flow-lower"
-                  d="M 408 280 L 560 420"
+                  d="M 408 280 L 472 280 L 472 420 L 560 420"
                   fill="none"
                 />
 
-                {/* Upper execution */}
                 <path
                   id="flow-crm"
                   d="M 648 140 L 712 140"
                   fill="none"
                 />
 
-                {/* Lower execution */}
                 <path
                   id="flow-whatsapp"
                   d="M 648 420 L 712 420"
@@ -135,112 +222,109 @@ export default function Workflow() {
                 />
               </defs>
 
-              {/* Static connections */}
               <path
+                className="workflow-path"
                 d="M 168 280 L 232 280"
-                stroke="rgba(255,255,255,0.16)"
+                stroke="rgba(255,255,255,0.32)"
                 strokeWidth="1"
+                fill="none"
               />
 
               <path
-                d="M 408 280 L 560 140"
-                stroke="rgba(255,255,255,0.13)"
+                className="workflow-path"
+                d="M 232 280 L 408 280"
+                stroke="rgba(255,255,255,0.32)"
                 strokeWidth="1"
+                fill="none"
               />
 
               <path
-                d="M 408 280 L 560 420"
-                stroke="rgba(255,255,255,0.13)"
+                className="workflow-path"
+                d="M 408 280 L 472 280 L 472 140 L 560 140"
+                stroke="rgba(255,255,255,0.26)"
                 strokeWidth="1"
+                fill="none"
               />
 
               <path
+                className="workflow-path"
+                d="M 408 280 L 472 280 L 472 420 L 560 420"
+                stroke="rgba(255,255,255,0.26)"
+                strokeWidth="1"
+                fill="none"
+              />
+
+              <path
+                className="workflow-path"
                 d="M 648 140 L 712 140"
-                stroke="rgba(255,255,255,0.16)"
+                stroke="rgba(255,255,255,0.32)"
                 strokeWidth="1"
+                fill="none"
               />
 
               <path
+                className="workflow-path"
                 d="M 648 420 L 712 420"
-                stroke="rgba(255,255,255,0.16)"
+                stroke="rgba(255,255,255,0.32)"
                 strokeWidth="1"
+                fill="none"
               />
 
-              {/* Animated signal — incoming */}
-              <circle
-                r="2.5"
-                fill="white"
-                filter="url(#flowGlow)"
-              >
+              <circle r="2.5" fill="white" filter="url(#flowGlow)">
                 <animateMotion
                   dur="2.8s"
                   repeatCount="indefinite"
                   begin="0s"
-                  rotate="auto"
                 >
                   <mpath href="#flow-main" />
                 </animateMotion>
               </circle>
 
-              {/* Animated signal — upper branch */}
-              <circle
-                r="2"
-                fill="white"
-                filter="url(#flowGlow)"
-              >
+              <circle r="2.5" fill="white" filter="url(#flowGlow)">
+                <animateMotion
+                  dur="2.8s"
+                  repeatCount="indefinite"
+                  begin="0.35s"
+                >
+                  <mpath href="#flow-backbone" />
+                </animateMotion>
+              </circle>
+
+              <circle r="2" fill="white" filter="url(#flowGlow)">
                 <animateMotion
                   dur="2.8s"
                   repeatCount="indefinite"
                   begin="0.65s"
-                  rotate="auto"
                 >
                   <mpath href="#flow-upper" />
                 </animateMotion>
               </circle>
 
-              {/* Animated signal — lower branch */}
-              <circle
-                r="2"
-                fill="white"
-                filter="url(#flowGlow)"
-              >
+              <circle r="2" fill="white" filter="url(#flowGlow)">
                 <animateMotion
                   dur="2.8s"
                   repeatCount="indefinite"
                   begin="0.65s"
-                  rotate="auto"
                 >
                   <mpath href="#flow-lower" />
                 </animateMotion>
               </circle>
 
-              {/* Animated signal — CRM */}
-              <circle
-                r="2"
-                fill="white"
-                filter="url(#flowGlow)"
-              >
+              <circle r="2" fill="white" filter="url(#flowGlow)">
                 <animateMotion
                   dur="2.8s"
                   repeatCount="indefinite"
                   begin="1.25s"
-                  rotate="auto"
                 >
                   <mpath href="#flow-crm" />
                 </animateMotion>
               </circle>
 
-              {/* Animated signal — WhatsApp */}
-              <circle
-                r="2"
-                fill="white"
-                filter="url(#flowGlow)"
-              >
+              <circle r="2" fill="white" filter="url(#flowGlow)">
                 <animateMotion
                   dur="2.8s"
                   repeatCount="indefinite"
                   begin="1.25s"
-                  rotate="auto"
                 >
                   <mpath href="#flow-whatsapp" />
                 </animateMotion>
@@ -258,28 +342,24 @@ export default function Workflow() {
                 }}
               >
                 <div
-                  className="workflow-node group relative w-44 border border-white/15 bg-black p-4"
+                  className="workflow-node group relative w-44 border border-white/35 bg-white/[0.04] p-4 shadow-[0_0_48px_rgba(255,255,255,0.06)] backdrop-blur-sm"
                   style={{
                     animationDelay: `${index * 0.65}s`,
-                    animationName: "nodeActivation",
-                    animationDuration: "2.8s",
-                    animationTimingFunction: "ease-in-out",
-                    animationIterationCount: "infinite",
                   }}
                 >
                   {/* Processing glow */}
                   <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    <div className="absolute inset-0 bg-white/[0.025]" />
+                    <div className="absolute inset-0 bg-white/[0.06]" />
                   </div>
 
                   <div className="relative mb-5 flex items-center justify-between">
-                    <span className="text-[9px] tracking-[0.15em] text-white/25">
+                    <span className="text-[9px] tracking-[0.15em] text-white/45">
                       {node.id}
                     </span>
 
                     {/* Line indicator */}
                     <span
-                      className="workflow-node-dot block h-px w-5 bg-white/30"
+                      className="workflow-node-dot block h-px w-5 bg-white/55"
                       style={{
                         animationName: "workflowLinePulse",
                         animationDuration: "2.8s",
@@ -290,7 +370,7 @@ export default function Workflow() {
                     />
                   </div>
 
-                  <span className="relative text-[10px] uppercase tracking-[0.16em] text-white/65">
+                  <span className="relative text-[11px] font-medium uppercase tracking-[0.14em] text-white/90">
                     {node.label}
                   </span>
                 </div>
@@ -386,19 +466,37 @@ export default function Workflow() {
         @keyframes nodeActivation {
           0%,
           100% {
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 32px rgba(255, 255, 255, 0.04);
           }
 
           12% {
-            border-color: rgba(255, 255, 255, 0.42);
-            box-shadow: 0 0 28px rgba(255, 255, 255, 0.045);
+            border-color: rgba(255, 255, 255, 0.65);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
           }
 
           24% {
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 32px rgba(255, 255, 255, 0.04);
           }
+        }
+
+        .workflow-node {
+          animation: none;
+        }
+
+        :global(.section-motion.is-booted) .workflow-node {
+          animation-name: nodeActivation;
+          animation-duration: 2.8s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+
+        :global(.section-motion.is-booted) .workflow-node-dot {
+          animation-name: workflowLinePulse;
+          animation-duration: 2.8s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {

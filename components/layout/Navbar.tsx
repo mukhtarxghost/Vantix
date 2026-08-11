@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed left-0 top-0 z-50 w-full px-5 py-5 md:px-8">
-      <nav className="mx-auto flex max-w-[1600px] items-center justify-between border border-white/10 bg-black/60 px-4 py-3 backdrop-blur-xl md:px-5">
+      <nav className="site-nav mx-auto flex max-w-[1600px] items-center justify-between border border-white/10 bg-black/60 px-4 py-3 backdrop-blur-xl md:px-5">
         <a href="/" className="text-lg font-semibold tracking-[-0.04em]">
           VANTIX<span className="text-white/30">.</span>
         </a>

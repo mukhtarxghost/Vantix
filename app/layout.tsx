@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Cursor from "@/components/ui/Cursor";
+import { MotionProvider } from "@/components/system/MotionContext";
+import AliveGrid from "@/components/system/AliveGrid";
+import ScrollTypographyBridge from "@/components/system/ScrollTypographyBridge";
+import SmoothScroll from "@/components/system/SmoothScroll";
+import GlobalReveal from "@/components/system/GlobalReveal";
+import SiteMotion from "@/components/system/SiteMotion";
+import ScrollProgress from "@/components/system/ScrollProgress";
 
 export const metadata: Metadata = {
   title: "Vantix — Automation Solutions",
@@ -15,8 +22,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Cursor />
-        {children}
+        <MotionProvider>
+          <AliveGrid />
+          <SmoothScroll />
+          <ScrollTypographyBridge />
+          <GlobalReveal />
+          <SiteMotion />
+          <ScrollProgress />
+          <Cursor />
+          <div className="relative z-[1]">{children}</div>
+        </MotionProvider>
       </body>
     </html>
   );

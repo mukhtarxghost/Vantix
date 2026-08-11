@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "@/lib/gsap";
+import { useMotion } from "@/components/system/MotionContext";
+import { useSectionActive } from "@/hooks/useSectionActive";
+import SectionAmbient from "@/components/ui/SectionAmbient";
 
 const solutions = [
   {
@@ -39,17 +43,67 @@ const solutions = [
 
 export default function Solutions() {
   const [active, setActive] = useState(0);
+  const { ref: sectionRef, active: sectionActive } = useSectionActive();
+  const { reducedMotion } = useMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const activatedRef = useRef(false);
 
   const current = solutions[active];
 
+  useEffect(() => {
+    sectionRef.current?.classList.toggle("is-section-active", sectionActive);
+  }, [sectionActive, sectionRef]);
+
+  useEffect(() => {
+    if (!sectionActive || activatedRef.current || reducedMotion) return;
+    activatedRef.current = true;
+
+    const rows = sectionRef.current?.querySelectorAll(".solution-row");
+    if (!rows?.length) return;
+
+    sectionRef.current?.setAttribute("data-activated", "true");
+
+    gsap.fromTo(
+      rows,
+      { opacity: 0.4, x: -8 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.55,
+        stagger: 0.08,
+        ease: "power2.out",
+      }
+    );
+  }, [sectionActive, reducedMotion, sectionRef]);
+
+  useEffect(() => {
+    if (reducedMotion || !descRef.current) return;
+
+    gsap.fromTo(
+      descRef.current,
+      { opacity: 0, y: 16 },
+      { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }
+    );
+  }, [active, reducedMotion]);
+
   return (
     <section
+      ref={sectionRef}
       id="solutions"
-      className="relative overflow-hidden border-b border-white/10 bg-[#050505] px-5 py-24 md:px-8 md:py-32"
+      data-activated={reducedMotion ? "true" : "false"}
+      className="section-motion relative overflow-hidden border-b border-white/10 bg-[#050505] px-5 py-24 md:px-8 md:py-32"
     >
+      <SectionAmbient
+        position="center"
+        size="sm"
+        showRing
+        cycleLabels={["CAPTURE", "QUALIFY", "ROUTE", "EXECUTE"]}
+      />
+
       {/* Grid */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="legacy-section-grid pointer-events-none absolute inset-0"
         style={{
           backgroundImage: `
             linear-gradient(
@@ -67,11 +121,10 @@ export default function Solutions() {
         }}
       />
 
-      <div className="relative mx-auto max-w-[1600px]">
-        {/* Header */}
-        <div className="mb-20 flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="section-inner relative mx-auto max-w-[1600px]">
+        <div className="section-header-bar section-fade mb-20 flex items-center justify-between border-b border-white/10 pb-4">
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
-            02 / Solutions
+            03 / Solutions
           </span>
 
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
@@ -81,15 +134,13 @@ export default function Solutions() {
 
         {/* Intro */}
         <div className="mb-20 grid gap-10 md:grid-cols-[1.4fr_0.6fr] md:items-end">
-          <h2 className="max-w-[1100px] text-[clamp(4rem,9vw,9rem)] font-medium leading-[0.8] tracking-[-0.075em] text-white">
-            LESS
-            <br />
-            <span className="text-white/30">MANUAL.</span>
-            <br />
-            MORE SYSTEM.
+          <h2 className="display-heading max-w-[1100px] text-[clamp(4rem,9vw,9rem)] font-medium leading-[0.8] tracking-[-0.075em] text-white">
+            <span className="display-line">LESS</span>
+            <span className="display-line grey-word text-white/30">MANUAL.</span>
+            <span className="display-line">MORE SYSTEM.</span>
           </h2>
 
-          <div className="max-w-sm pb-2">
+          <div className="section-fade max-w-sm pb-2">
             <p className="text-sm leading-6 text-white/45">
               We build automation around the work your business should not
               have to keep doing manually.
@@ -98,7 +149,7 @@ export default function Solutions() {
         </div>
 
         {/* Solution interface */}
-        <div className="border border-white/10">
+        <div className="motion-panel border border-white/10">
           {/* Top status bar */}
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <span className="text-[10px] uppercase tracking-[0.18em] text-white/30">
@@ -125,7 +176,7 @@ export default function Solutions() {
                     key={solution.id}
                     type="button"
                     onClick={() => setActive(index)}
-                    className={`group relative flex w-full items-center justify-between border-b border-white/10 px-5 py-7 text-left transition-all duration-300 last:border-b-0 md:px-7 ${
+                      className={`solution-row group relative flex w-full items-center justify-between border-b border-white/10 px-5 py-7 text-left transition-all duration-300 last:border-b-0 md:px-7 ${
                       isActive ? "bg-white/[0.025]" : "hover:bg-white/[0.015]"
                     }`}
                   >
@@ -181,7 +232,7 @@ export default function Solutions() {
             </div>
 
             {/* Right — active system */}
-            <div className="relative min-h-[430px] overflow-hidden p-6 md:p-10">
+            <div ref={panelRef} className="relative min-h-[430px] overflow-hidden p-6 md:p-10">
               {/* Subtle center glow */}
               <div className="pointer-events-none absolute right-[-100px] top-[-100px] h-[300px] w-[300px] rounded-full bg-white/[0.025] blur-[100px]" />
 
@@ -205,7 +256,11 @@ export default function Solutions() {
 
                 {/* Description */}
                 <div className="py-16">
-                  <p className="max-w-[600px] text-[clamp(1.5rem,3vw,2.7rem)] font-light leading-[1.05] tracking-[-0.04em] text-white/75">
+                  <p
+                    ref={descRef}
+                    key={current.id}
+                    className="solution-panel-content max-w-[600px] text-[clamp(1.5rem,3vw,2.7rem)] font-light leading-[1.05] tracking-[-0.04em] text-white/75"
+                  >
                     {current.description}
                   </p>
                 </div>

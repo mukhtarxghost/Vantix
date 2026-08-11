@@ -1,6 +1,12 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
+import { gsap } from "@/lib/gsap";
+import { useMotion } from "@/components/system/MotionContext";
+import { useSectionActive } from "@/hooks/useSectionActive";
+import SectionAmbient from "@/components/ui/SectionAmbient";
+import StatCounter from "@/components/ui/StatCounter";
 
 const stats = [
   {
@@ -26,19 +32,72 @@ const stack = [
 ];
 
 export default function CaseStudies() {
+  const { ref: sectionRef, active: sectionActive } = useSectionActive();
+  const { reducedMotion } = useMotion();
+  const revealedRef = useRef(false);
+
+  useEffect(() => {
+    sectionRef.current?.classList.toggle("is-section-active", sectionActive);
+  }, [sectionActive, sectionRef]);
+
+  useEffect(() => {
+    if (!sectionActive || revealedRef.current || reducedMotion) return;
+    revealedRef.current = true;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    section.setAttribute("data-revealed", "true");
+
+    const nodes = section.querySelectorAll(".case-node");
+    gsap.fromTo(
+      nodes,
+      { opacity: 0, scale: 0.96, y: 12 },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 0.65,
+        stagger: 0.08,
+        ease: "power2.out",
+        delay: 0.35,
+      }
+    );
+
+    const reveals = section.querySelectorAll(".case-reveal");
+    gsap.fromTo(
+      reveals,
+      { clipPath: "inset(100% 0 0 0)", opacity: 0 },
+      {
+        clipPath: "inset(0 0 0 0)",
+        opacity: 1,
+        duration: 0.9,
+        stagger: 0.12,
+        ease: "power3.out",
+      }
+    );
+  }, [sectionActive, reducedMotion, sectionRef]);
+
   return (
     <section
+      ref={sectionRef}
       id="work"
-      className="relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
+      data-revealed={reducedMotion ? "true" : "false"}
+      className="section-motion relative overflow-hidden border-b border-white/10 px-5 py-24 md:px-8 md:py-32"
     >
-      {/* Grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+      <SectionAmbient
+        position="right"
+        showRing
+        cycleLabels={["LIVE", "CONNECTED", "AUTONOMOUS", "ONLINE"]}
+      />
 
-      <div className="relative mx-auto max-w-[1600px]">
-        {/* Header */}
-        <div className="mb-20 flex items-center justify-between border-b border-white/10 pb-4">
+      {/* Grid */}
+      <div className="legacy-section-grid pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:80px_80px]" />
+
+      <div className="section-inner relative mx-auto max-w-[1600px]">
+        <div className="section-header-bar section-fade mb-20 flex items-center justify-between border-b border-white/10 pb-4">
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
-            03 / Selected Work
+            04 / Selected Work
           </span>
 
           <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
@@ -49,20 +108,18 @@ export default function CaseStudies() {
         {/* Project heading */}
         <div className="mb-16 grid gap-10 md:grid-cols-[1.2fr_0.5fr]">
           <div>
-            <p className="mb-6 text-xs uppercase tracking-[0.2em] text-white/40">
+            <p className="section-fade mb-6 text-xs uppercase tracking-[0.2em] text-white/40">
               Case study / 001
             </p>
 
-            <h2 className="text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.8] tracking-[-0.07em]">
-              AI
-              <br />
-              <span className="text-white/30">OPERATIONS</span>
-              <br />
-              SYSTEM.
+            <h2 className="display-heading text-[clamp(3.5rem,8vw,8rem)] font-medium leading-[0.8] tracking-[-0.07em]">
+              <span className="display-line">AI</span>
+              <span className="display-line grey-word text-white/30">OPERATIONS</span>
+              <span className="display-line">SYSTEM.</span>
             </h2>
           </div>
 
-          <div className="flex items-end">
+          <div className="section-fade flex items-end">
             <p className="max-w-sm text-sm leading-6 text-white/45">
               A conversational automation system designed to handle customer
               interactions, understand intent, manage availability, and
@@ -72,7 +129,7 @@ export default function CaseStudies() {
         </div>
 
         {/* Main project panel */}
-        <div className="overflow-hidden border border-white/10 bg-white/[0.015]">
+        <div className="case-reveal overflow-hidden border border-white/10 bg-white/[0.015]">
           {/* Project top bar */}
           <div className="flex flex-col justify-between gap-4 border-b border-white/10 px-5 py-4 md:flex-row md:items-center">
             <div className="flex items-center gap-4">
@@ -94,7 +151,7 @@ export default function CaseStudies() {
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.025] blur-[100px]" />
 
             {/* Center system */}
-            <div className="absolute left-1/2 top-1/2 z-10 w-[min(360px,75vw)] -translate-x-1/2 -translate-y-1/2 border border-white/20 bg-black p-6">
+            <div className="case-node absolute left-1/2 top-1/2 z-10 w-[min(360px,75vw)] -translate-x-1/2 -translate-y-1/2 border border-white/20 bg-black p-6">
               <div className="mb-8 flex items-center justify-between">
                 <span className="text-[9px] uppercase tracking-[0.16em] text-white/25">
                   Core Engine
@@ -125,7 +182,7 @@ export default function CaseStudies() {
             </div>
 
             {/* Left nodes */}
-            <div className="absolute left-5 top-16 border border-white/10 bg-black px-4 py-4 md:left-16">
+            <div className="case-node absolute left-5 top-16 border border-white/10 bg-black px-4 py-4 md:left-16">
               <div className="mb-4 text-[9px] tracking-[0.15em] text-white/25">
                 01
               </div>
@@ -135,7 +192,7 @@ export default function CaseStudies() {
               </div>
             </div>
 
-            <div className="absolute bottom-16 left-5 border border-white/10 bg-black px-4 py-4 md:left-16">
+            <div className="case-node absolute bottom-16 left-5 border border-white/10 bg-black px-4 py-4 md:left-16">
               <div className="mb-4 text-[9px] tracking-[0.15em] text-white/25">
                 02
               </div>
@@ -146,7 +203,7 @@ export default function CaseStudies() {
             </div>
 
             {/* Right nodes */}
-            <div className="absolute right-5 top-16 border border-white/10 bg-black px-4 py-4 md:right-16">
+            <div className="case-node absolute right-5 top-16 border border-white/10 bg-black px-4 py-4 md:right-16">
               <div className="mb-4 text-[9px] tracking-[0.15em] text-white/25">
                 03
               </div>
@@ -156,7 +213,7 @@ export default function CaseStudies() {
               </div>
             </div>
 
-            <div className="absolute bottom-16 right-5 border border-white/10 bg-black px-4 py-4 md:right-16">
+            <div className="case-node absolute bottom-16 right-5 border border-white/10 bg-black px-4 py-4 md:right-16">
               <div className="mb-4 text-[9px] tracking-[0.15em] text-white/25">
                 04
               </div>
@@ -179,18 +236,7 @@ export default function CaseStudies() {
           {/* Stats */}
           <div className="grid border-t border-white/10 md:grid-cols-3">
             {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="border-b border-white/10 p-6 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0"
-              >
-                <div className="text-3xl font-medium tracking-[-0.05em]">
-                  {stat.value}
-                </div>
-
-                <div className="mt-2 text-[9px] uppercase tracking-[0.16em] text-white/25">
-                  {stat.label}
-                </div>
-              </div>
+              <StatCounter key={stat.label} value={stat.value} label={stat.label} />
             ))}
           </div>
 
@@ -215,7 +261,7 @@ export default function CaseStudies() {
         </div>
 
         {/* CTA */}
-        <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+        <div className="section-fade mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <p className="max-w-md text-xs leading-5 text-white/30">
             From the first message to the final action, every step is
             connected.

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useMotion } from "@/components/system/MotionContext";
 
 export default function Cursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const { setCursor } = useMotion();
 
   useEffect(() => {
     const cursor = cursorRef.current;
@@ -25,6 +27,7 @@ export default function Cursor() {
     const handleMouseMove = (event: MouseEvent) => {
       mouseX = event.clientX;
       mouseY = event.clientY;
+      setCursor(mouseX, mouseY);
       cursor.style.opacity = "1";
     };
 
@@ -64,8 +67,9 @@ export default function Cursor() {
       document.removeEventListener("mouseover", handleMouseOver);
       document.removeEventListener("mouseout", handleMouseOut);
       cancelAnimationFrame(animationFrame);
+      setCursor(-9999, -9999);
     };
-  }, []);
+  }, [setCursor]);
 
   return (
     <div

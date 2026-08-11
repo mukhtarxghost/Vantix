@@ -1,0 +1,28 @@
+---
+description: Locked Vantix site baseline — do not alter grid, hero, or motion without explicit user request
+alwaysApply: true
+---
+
+# Vantix Site Lock (approved baseline)
+
+This project is locked at tag **`site-lock-v1`** on `main`.
+
+## Do not change without explicit user approval
+
+- **AliveGrid** (`components/system/AliveGrid.tsx`, grid CSS in `app/globals.css`)
+- **Hero layout + orb** (`components/hero/Hero.tsx`, `components/ui/HeroOrb.tsx`)
+- **Global motion stack** (`components/system/*`, `lib/motion.ts`, `lib/gsap.ts`, `lib/cursorStore.ts`)
+- **Section motion/reveal patterns** across `components/sections/*`
+- **Overall visual character**: dark monochrome, subtle liveness, no redesigns
+
+## Allowed without asking
+
+- Bug fixes that restore intended behavior
+- Copy/content updates the user requests
+- Booking form wiring, API, or contrast fixes if broken
+
+## Restore this version
+
+```bash
+git checkout site-lock-v1
+```
