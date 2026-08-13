@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { createSubmission } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -28,19 +28,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const submission = await prisma.submission.create({
-      data: {
-        formType,
-        businessType: businessType ?? null,
-        name,
-        email,
-        phone: phone ?? null,
-        company: company ?? null,
-        website: website ?? null,
-        volume: volume ?? null,
-        budget: budget ?? null,
-        message: message ?? null,
-      },
+    const submission = await createSubmission({
+      formType,
+      businessType: businessType ?? null,
+      name,
+      email,
+      phone: phone ?? null,
+      company: company ?? null,
+      website: website ?? null,
+      volume: volume ?? null,
+      budget: budget ?? null,
+      message: message ?? null,
     });
 
     console.log("[vantix/booking] saved:", submission.id);

@@ -1,24 +1,39 @@
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../generated/prisma/client";
+import { getDatabase } from "@netlify/database";
 
-const url = new URL(process.env.DATABASE_URL!);
-
-const adapter = new PrismaMariaDb({
-  host: url.hostname,
-  port: Number(url.port),
-  user: decodeURIComponent(url.username),
-  password: decodeURIComponent(url.password),
-  database: url.pathname.slice(1),
-  connectionLimit: 5,
-});
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+export type SubmissionInput = {
+  formType: string;
+  businessType?: string | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  website?: string | null;
+  volume?: string | null;
+  budget?: string | null;
+  message?: string | null;
 };
 
-export const prisma =
-  globalForPrisma.prisma ?? new PrismaClient({ adapter });
+export async function createSubmission(input: SubmissionInput) {
+  const db = getDatabase();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  const [submission] = await db.sql`
+    INSERT INTO submissions (
+      form_type, business_type, name, email, phone, company, website, volume, budget, message
+    )
+    VALUES (
+      ${input.formType},
+      ${input.businessType ?? null},
+      ${input.name},
+      ${input.email},
+      ${input.phone ?? null},
+      ${input.company ?? null},
+      ${input.website ?? null},
+      ${input.volume ?? null},
+      ${input.budget ?? null},
+      ${input.message ?? null}
+    )
+    RETURNING id
+  `;
+
+  return submission;
 }
