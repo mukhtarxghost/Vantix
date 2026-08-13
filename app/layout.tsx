@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Cursor from "@/components/ui/Cursor";
 import { MotionProvider } from "@/components/system/MotionContext";
@@ -9,9 +10,21 @@ import GlobalReveal from "@/components/system/GlobalReveal";
 import SiteMotion from "@/components/system/SiteMotion";
 import ScrollProgress from "@/components/system/ScrollProgress";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Vantix — Automation Solutions",
-  description: "Intelligent systems for modern business.",
+  title: "Vantix — Intelligent Automation Infrastructure",
+  description: "Vantix designs and deploys intelligent automation systems that eliminate repetitive work and keep businesses moving.",
 };
 
 export default function RootLayout({
@@ -20,8 +33,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className="font-sans antialiased bg-[#050505] text-[#f5f5f5] selection:bg-white selection:text-black">
         <MotionProvider>
           <AliveGrid />
           <SmoothScroll />
@@ -36,3 +49,4 @@ export default function RootLayout({
     </html>
   );
 }
+

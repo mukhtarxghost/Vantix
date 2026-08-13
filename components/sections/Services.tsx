@@ -132,12 +132,12 @@ export default function Services() {
             const isActive = active === index;
 
             return (
-              <button
+              <a
                 key={service.number}
-                type="button"
+                href="/contact"
                 onMouseEnter={() => setActive(index)}
                 onFocus={() => setActive(index)}
-                className="service-row group block w-full border-b border-white/10 text-left"
+                className="service-row group block w-full border-b border-white/10 text-left transition-colors hover:bg-white/[0.015]"
               >
                 <div
                   className={`grid transition-all duration-500 md:grid-cols-[80px_1fr_1fr_80px] md:items-center ${
@@ -146,7 +146,7 @@ export default function Services() {
                 >
                   {/* Number */}
                   <span
-                    className={`text-[10px] tracking-[0.15em] transition-colors duration-300 ${
+                    className={`text-[10px] font-mono tracking-[0.15em] transition-colors duration-300 ${
                       isActive ? "text-white" : "text-white/25"
                     }`}
                   >
@@ -173,7 +173,7 @@ export default function Services() {
                       {service.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="border border-white/10 px-2 py-1 text-[8px] tracking-[0.14em] text-white/30"
+                          className="border border-white/10 px-2 py-1 text-[8px] font-mono tracking-[0.14em] text-white/30"
                         >
                           {tag}
                         </span>
@@ -201,7 +201,7 @@ export default function Services() {
                       {service.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="border border-white/10 px-2 py-1 text-[8px] tracking-[0.14em] text-white/30"
+                          className="border border-white/10 px-2 py-1 text-[8px] font-mono tracking-[0.14em] text-white/30"
                         >
                           {tag}
                         </span>
@@ -214,7 +214,7 @@ export default function Services() {
                     <span
                       className={`flex h-10 w-10 items-center justify-center border transition-all duration-300 ${
                         isActive
-                          ? "border-white/30 bg-white text-black"
+                          ? "border-white/40 bg-white text-black translate-x-1 -translate-y-1"
                           : "border-white/10 text-white/25"
                       }`}
                     >
@@ -222,7 +222,7 @@ export default function Services() {
                     </span>
                   </div>
                 </div>
-              </button>
+              </a>
             );
           })}
         </div>
