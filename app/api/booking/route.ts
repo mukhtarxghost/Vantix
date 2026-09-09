@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -44,6 +46,25 @@ export async function POST(request: Request) {
     });
 
     console.log("[vantix/booking] saved:", submission.id);
+
+    if (WEBHOOK_URL) {
+      fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessType: businessType ?? null,
+          fullName: name,
+          email,
+          phone: phone ?? null,
+          company: company ?? null,
+          website: website ?? null,
+          revenue: volume ?? budget ?? null,
+          message: message ?? null,
+        }),
+      }).catch((err) =>
+        console.error("[vantix/booking] webhook failed:", err)
+      );
+    }
 
     return NextResponse.json({
       success: true,
