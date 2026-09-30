@@ -1,27 +1,28 @@
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/hero/Hero";
-import Workflow from "@/components/sections/Workflow";
-import Services from "@/components/sections/Services";
-import CaseStudies from "@/components/sections/CaseStudies";
-import Process from "@/components/sections/Process";
+import Problem from "@/components/sections/Problem";
+import Acquire from "@/components/sections/Acquire";
+import Convert from "@/components/sections/Convert";
+import Manage from "@/components/sections/Manage";
+import Automate from "@/components/sections/Automate";
+import System from "@/components/sections/System";
+import Results from "@/components/sections/Results";
 import CTA from "@/components/sections/CTA";
 import Footer from "@/components/layout/Footer";
-import Solutions from "@/components/sections/Solutions";
-import ContactCTA from "@/components/sections/ContactCTA";
-
 
 export default function Home() {
   return (
     <main>
       <Navbar />
       <Hero />
-      <Workflow />
-      <Services />
-      <Solutions />
-      <CaseStudies />
-      <Process />
+      <Problem />
+      <Acquire />
+      <Convert />
+      <Manage />
+      <Automate />
+      <System />
+      <Results />
       <CTA />
-      <ContactCTA />
       <Footer />
     </main>
   );

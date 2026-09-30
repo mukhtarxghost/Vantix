@@ -11,85 +11,123 @@ export default function SiteMotion() {
     if (reducedMotion) return;
 
     const ctx = gsap.context(() => {
+      // Section inner parallax (skip scene sections)
       gsap.utils.toArray<HTMLElement>(".section-motion").forEach((section) => {
-        if (section.id === "hero-section") return;
+        if (section.id === "hero-section" || section.id?.startsWith("scene-")) return;
 
         const inner = section.querySelector<HTMLElement>(".section-inner");
         if (!inner) return;
 
         gsap.fromTo(
           inner,
-          { y: 40 },
+          { y: 30 },
           {
-            y: -30,
+            y: -20,
             ease: "none",
             scrollTrigger: {
               trigger: section,
               start: "top bottom",
               end: "bottom top",
-              scrub: 1.8,
+              scrub: 1.5,
             },
           }
         );
       });
 
-      gsap.utils.toArray<HTMLElement>(".section-convergence").forEach((section) => {
-        const glow = section.querySelector(".section-ambient-glow");
-        if (!glow) return;
+      // Section fade-in (skip scene sections)
+      gsap.utils.toArray<HTMLElement>(".section-fade").forEach((el) => {
+        if (el.closest("#hero-section") || el.closest("[id^='scene-']")) return;
 
-        gsap.to(glow, {
-          scale: 1.15,
-          opacity: 0.55,
-          ease: "none",
+        gsap.from(el, {
           scrollTrigger: {
-            trigger: section,
-            start: "top 80%",
-            end: "center center",
-            scrub: 1.2,
-          },
-        });
-      });
-
-      gsap.utils.toArray<HTMLElement>(".motion-panel").forEach((panel) => {
-        if (panel.closest(".workflow-engine")) return;
-
-        gsap.from(panel, {
-          scrollTrigger: {
-            trigger: panel,
-            start: "top 90%",
+            trigger: el,
+            start: "top 88%",
             toggleActions: "play none none reverse",
           },
-          y: 32,
+          y: 24,
           opacity: 0,
-          duration: 0.9,
+          duration: 0.7,
           ease: "power3.out",
         });
       });
 
-      const nav = document.querySelector<HTMLElement>(".site-nav");
-      if (nav) {
-        ScrollTrigger.create({
-          start: "top -80",
-          onUpdate: (self) => {
-            const p = Math.min(1, self.scroll());
-            nav.style.background = `rgba(0,0,0,${0.55 + p * 0.02})`;
-            nav.style.borderColor = `rgba(255,255,255,${0.08 + p * 0.04})`;
+      // Display heading line reveals (skip scene sections)
+      gsap.utils.toArray<HTMLElement>(".display-heading").forEach((heading) => {
+        if (heading.closest("#hero-section") || heading.closest("[id^='scene-']")) return;
+
+        const lines = heading.querySelectorAll<HTMLElement>(".display-line");
+        if (lines.length) {
+          gsap.set(lines, { y: 36, opacity: 0 });
+
+          gsap.to(lines, {
+            scrollTrigger: {
+              trigger: heading,
+              start: "top 82%",
+              toggleActions: "play none none reverse",
+            },
+            y: 0,
+            opacity: 1,
+            duration: 0.85,
+            stagger: 0.08,
+            ease: "power3.out",
+          });
+        }
+      });
+
+      // Grey word scrub (skip scene sections)
+      gsap.utils.toArray<HTMLElement>(".grey-word").forEach((word) => {
+        if (word.closest("[id^='scene-']")) return;
+
+        const section = word.closest(".section-motion");
+        if (!section) return;
+
+        gsap.fromTo(
+          word,
+          { opacity: 0.15 },
+          {
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 55%",
+              end: "top 25%",
+              scrub: 0.8,
+            },
+          }
+        );
+      });
+
+      // Background grid slow parallax
+      const grid = document.querySelector<HTMLElement>(".alive-grid-base");
+      if (grid) {
+        gsap.to(grid, {
+          scrollTrigger: {
+            trigger: document.documentElement,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 2,
           },
+          y: -100,
+          ease: "none",
         });
       }
 
-      gsap.from(".site-footer-inner > *", {
-        scrollTrigger: {
-          trigger: ".site-footer-inner",
-          start: "top 92%",
-          toggleActions: "play none none reverse",
-        },
-        y: 28,
-        opacity: 0,
-        duration: 0.75,
-        stagger: 0.08,
-        ease: "power2.out",
-      });
+      // Footer staggered reveal (guard — footer may be absent on some routes)
+      const footerInner = document.querySelector<HTMLElement>(".site-footer-inner");
+      if (footerInner) {
+        gsap.from(footerInner.children, {
+          scrollTrigger: {
+            trigger: footerInner,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+          },
+          y: 24,
+          opacity: 0,
+          duration: 0.7,
+          stagger: 0.07,
+          ease: "power2.out",
+        });
+      }
     });
 
     return () => ctx.revert();

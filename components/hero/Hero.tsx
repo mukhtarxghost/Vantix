@@ -1,266 +1,147 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { cursorStore } from "@/lib/cursorStore";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { gsap } from "@/lib/gsap";
 import { useMotion } from "@/components/system/MotionContext";
-import HeroOrb from "@/components/ui/HeroOrb";
-import { LM_EASE, LM_STAGGER } from "@/lib/motion";
+import { LM_EASE } from "@/lib/motion";
+import HeroVisual from "@/components/hero/HeroVisual";
 
-const SYSTEM_LABELS = [
-  "OPERATIONS",
-  "AUTOMATION",
-  "SYSTEMS",
-  "DEPLOYMENT",
-  "INTEGRATION",
+const pipeline = [
+  "ACQUIRE",
+  "CONVERT",
+  "MANAGE",
+  "RETAIN",
+  "GROW",
 ];
 
 export default function Hero() {
-  const stageRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
-  const floatRef = useRef<HTMLDivElement>(null);
-  const orbWrapRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const { reducedMotion } = useMotion();
 
   useLayoutEffect(() => {
-    const stage = stageRef.current;
-    const tilt = tiltRef.current;
-    const floatLayer = floatRef.current;
-    const orbWrap = orbWrapRef.current;
-    const label = labelRef.current;
+    if (!heroRef.current || reducedMotion) return;
 
-    if (!stage || !tilt || !floatLayer || reducedMotion) {
-      window.dispatchEvent(new CustomEvent("vantix:hero-ready"));
-      return;
-    }
-
-    const inners = stage.querySelectorAll<HTMLElement>(".hero-line-inner");
-    const fades = stage.querySelectorAll<HTMLElement>(".hero-fade");
-
-    let labelIndex = 0;
-    let labelTimer: ReturnType<typeof setInterval> | undefined;
-    let motionRaf = 0;
-    let ready = false;
-
+    const hero = heroRef.current;
     const ctx = gsap.context(() => {
-      gsap.set(inners, { y: 52, opacity: 0 });
-      gsap.set(fades, { y: 28, opacity: 0 });
-      gsap.set(orbWrap, { scale: 0.82, opacity: 0 });
+      const visual = hero.querySelector<HTMLElement>(".h-visual");
+      const eyebrow = hero.querySelector<HTMLElement>(".h-eyebrow");
+      const lines = hero.querySelectorAll<HTMLElement>(".h-line");
+      const copy = hero.querySelector<HTMLElement>(".h-copy");
+      const buttons = hero.querySelectorAll<HTMLElement>(".h-btn");
+      const pipelineEl = hero.querySelector<HTMLElement>(".h-pipeline");
 
-      const intro = gsap.timeline({
-        delay: 0.08,
-        onComplete: () => {
-          ready = true;
-          window.dispatchEvent(new CustomEvent("vantix:hero-ready"));
+      gsap.set(visual, { opacity: 0, scale: 1.05 });
+      gsap.set(eyebrow, { y: 18, opacity: 0 });
+      gsap.set(lines, { yPercent: 110 });
+      gsap.set(copy, { y: 20, opacity: 0 });
+      gsap.set(buttons, { y: 18, opacity: 0 });
+      gsap.set(pipelineEl, { y: 14, opacity: 0 });
 
-          gsap.to(floatLayer, {
-            y: -8,
-            duration: 5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
+      const tl = gsap.timeline({ delay: 0.25, defaults: { ease: LM_EASE.out } });
 
-          labelTimer = setInterval(() => {
-            if (!label) return;
-            labelIndex = (labelIndex + 1) % SYSTEM_LABELS.length;
-            gsap
-              .timeline()
-              .to(label, { opacity: 0, y: -6, duration: 0.2, ease: "power2.in" })
-              .add(() => {
-                label.textContent = SYSTEM_LABELS[labelIndex];
-              })
-              .fromTo(
-                label,
-                { opacity: 0, y: 8 },
-                { opacity: 1, y: 0, duration: 0.38, ease: LM_EASE.out }
-              );
-          }, 2600);
-        },
-      });
+      tl.to(visual, { opacity: 1, scale: 1, duration: 1.8, ease: "power2.out" }, 0);
+      tl.to(eyebrow, { y: 0, opacity: 1, duration: 0.7 }, 0.25);
+      tl.to(lines, { yPercent: 0, duration: 1.1, stagger: 0.12 }, 0.38);
+      tl.to(copy, { y: 0, opacity: 1, duration: 0.8 }, 0.68);
+      tl.to(buttons, { y: 0, opacity: 1, stagger: 0.09, duration: 0.7 }, 0.8);
+      tl.to(pipelineEl, { y: 0, opacity: 1, duration: 0.8 }, 1.0);
+    }, hero);
 
-      intro
-        .to(
-          orbWrap,
-          { scale: 1, opacity: 1, duration: 1.3, ease: LM_EASE.entrance },
-          0
-        )
-        .to(
-          inners,
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1,
-            stagger: LM_STAGGER,
-            ease: LM_EASE.out,
-          },
-          0.12
-        )
-        .to(
-          fades,
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            stagger: 0.07,
-            ease: LM_EASE.out,
-          },
-          "-=0.65"
-        );
-
-      gsap.to(stage, {
-        scrollTrigger: {
-          trigger: "#hero-section",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-        y: -50,
-        ease: "none",
-      });
-
-      gsap.to(orbWrap, {
-        scrollTrigger: {
-          trigger: "#hero-section",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.2,
-        },
-        y: -30,
-        ease: "none",
-      });
-    }, stage);
-
-    let rotX = 0;
-    let rotY = 0;
-    let targetRotX = 0;
-    let targetRotY = 0;
-
-    const onMouseMove = (event: MouseEvent) => {
-      cursorStore.set(event.clientX, event.clientY);
-    };
-
-    const motionTick = () => {
-      if (ready) {
-        const { x, y } = cursorStore.get();
-
-        if (x > 0) {
-          const nx = (x / window.innerWidth - 0.5) * 2;
-          const ny = (y / window.innerHeight - 0.5) * 2;
-          targetRotY = nx * 3.5;
-          targetRotX = -ny * 2.2;
-        } else {
-          targetRotX = 0;
-          targetRotY = 0;
-        }
-
-        rotX += (targetRotX - rotX) * 0.05;
-        rotY += (targetRotY - rotY) * 0.05;
-
-        tilt.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-      }
-
-      motionRaf = requestAnimationFrame(motionTick);
-    };
-
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    motionRaf = requestAnimationFrame(motionTick);
-
-    return () => {
-      ctx.revert();
-      window.removeEventListener("mousemove", onMouseMove);
-      cancelAnimationFrame(motionRaf);
-      if (labelTimer) clearInterval(labelTimer);
-    };
+    return () => ctx.revert();
   }, [reducedMotion]);
 
   return (
     <section
-      id="hero-section"
-      className="section-motion relative flex min-h-[100svh] flex-col overflow-hidden border-b border-white/10 px-5 pb-8 pt-28 md:px-8 md:pb-10"
+      ref={heroRef}
+      id="hero"
+      className="relative h-[100svh] min-h-[620px] overflow-hidden bg-[var(--background)]"
     >
-      <div
-        className="hero-top-vignette pointer-events-none absolute inset-x-0 top-0 h-full"
-        aria-hidden="true"
-      />
-      <div className="hero-light-beam pointer-events-none absolute inset-0" aria-hidden="true" />
-
-      <div
-        ref={orbWrapRef}
-        className="hero-orb-container pointer-events-none relative z-[1] mx-auto mt-4 flex flex-1 flex-col items-center justify-center md:mt-0"
-        aria-hidden="true"
-      >
-        <HeroOrb>
-          <span className="hero-ring-label-kicker">Active</span>
-          <span ref={labelRef} className="hero-ring-label-word">
-            OPERATIONS
-          </span>
-        </HeroOrb>
-        <div className="hero-scroll-cue pointer-events-none mt-8 flex flex-col items-center gap-2">
-          <span className="text-[9px] uppercase tracking-[0.28em] text-white/30">
-            Scroll
-          </span>
-          <span className="hero-scroll-line" />
-        </div>
+      {/* ─── 3D MARQUEE WALL — the living ecosystem, full bleed ─── */}
+      <div className="h-visual absolute inset-0 z-[1] will-change-transform">
+        <HeroVisual className="h-full w-full rounded-none" />
       </div>
 
-      <div
-        ref={stageRef}
-        className="hero-stage relative mx-auto w-full max-w-[1600px] shrink-0"
-      >
-        <div className="hero-fade mb-8 flex items-center justify-between border-b border-white/10 pb-4">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
-            Vantix / Automation Solutions
-          </span>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-white/35">
-            19.04° N / 72.88° E
-          </span>
-        </div>
+      {/* Scrims — keep the message readable above the wall */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-[38%] bg-gradient-to-r from-[var(--background)] via-[var(--background)]/55 to-transparent lg:w-[30%]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[20%] bg-gradient-to-t from-[var(--background)] via-[var(--background)]/35 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[12%] bg-gradient-to-b from-[var(--background)]/80 to-transparent" />
 
-        <div className="relative max-w-[1200px]">
-          <p className="hero-fade mb-6 text-xs uppercase tracking-[0.2em] text-white/40">
-            Intelligent systems for modern business
-          </p>
+      {/* ─── CONTENT — pointer-events pass through so the wall stays hoverable ─── */}
+      <div className="pointer-events-none relative z-[3] flex h-full items-center">
+        <div className="container w-full pb-24 pt-28 lg:pb-0 lg:pt-0">
+          <div className="max-w-[760px]">
+            {/* Eyebrow */}
+            <div className="h-eyebrow mb-8 flex items-center gap-3">
+              <span className="relative flex h-1.5 w-1.5 items-center justify-center">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-30" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+              </span>
+              <span className="mono-label text-white/40">Customer Growth Platform</span>
+            </div>
 
-          <div ref={tiltRef} className="hero-tilt">
-            <div ref={floatRef} className="hero-float">
-              <div
-                id="hero-heading"
-                className="hero-heading-3d text-[clamp(3.8rem,9.5vw,9.5rem)] font-medium leading-[0.78] tracking-[-0.075em]"
+            {/* Headline — masked line reveal */}
+            <h1 className="display-1 text-white">
+              <span className="block overflow-hidden pb-[0.08em]">
+                <span className="h-line block will-change-transform">Turn attention</span>
+              </span>
+              <span className="block overflow-hidden pb-[0.1em]">
+                <span className="h-line block will-change-transform">into customers<span className="text-[var(--accent)]">.</span></span>
+              </span>
+            </h1>
+
+            {/* Copy — the whole system in two sentences */}
+            <p className="h-copy mt-8 max-w-[500px] text-[14px] leading-[1.75] text-white/45 lg:text-[15px]">
+              Vantix creates the attention, converts it into customers, and
+              manages every relationship that follows — content, campaigns,
+              AI conversations, CRM, and automated follow-up in one system.
+            </p>
+
+            {/* Buttons */}
+            <div className="pointer-events-auto mt-10 flex flex-wrap items-center gap-3">
+              <Link
+                href="/book"
+                className="h-btn chamfer-button inline-flex items-center gap-2.5 bg-white px-8 py-4 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition-all hover:bg-[var(--accent)]"
               >
-                <div className="hero-line overflow-hidden">
-                  <span className="hero-line-inner block">WE BUILD</span>
-                </div>
-                <div className="hero-line overflow-hidden text-white/35">
-                  <span className="hero-line-inner hero-line-accent block">
-                    SYSTEMS
-                  </span>
-                </div>
-                <div className="hero-line overflow-hidden">
-                  <span className="hero-line-inner block">THAT WORK.</span>
-                </div>
-              </div>
+                Build your growth system
+                <ArrowUpRight size={12} strokeWidth={2.5} />
+              </Link>
+              <a
+                href="#acquire"
+                className="h-btn inline-flex items-center gap-2 border border-white/[0.14] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.14em] text-white/40 transition-colors hover:border-white/30 hover:text-white"
+              >
+                See how it works
+              </a>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="hero-fade mt-8 flex flex-col justify-between gap-8 border-t border-white/10 pt-6 md:flex-row md:items-end">
-          <p className="max-w-md text-sm leading-6 text-white/45">
-            Vantix designs and deploys intelligent automation systems that
-            eliminate repetitive work and keep businesses moving.
-          </p>
-          <a
-            href="/contact"
-            className="group flex w-fit items-center gap-4 text-xs uppercase tracking-[0.16em]"
-          >
-            <span className="border-b border-white pb-2">Start a project</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-2">
-              →
+      {/* ─── PIPELINE STRIP — bottom hairline row ─── */}
+      <div className="absolute inset-x-0 bottom-0 z-[4]">
+        <div className="container">
+          <div className="h-pipeline flex items-center justify-between gap-x-2 border-t border-white/[0.07] py-5 md:justify-start md:gap-x-0">
+            {pipeline.map((stage, i) => (
+              <div key={stage} className="flex items-center">
+                <a
+                  href={`#${stage === "ACQUIRE" ? "acquire" : stage === "CONVERT" ? "convert" : stage === "MANAGE" ? "manage" : stage === "RETAIN" ? "automation" : "system"}`}
+                  className={`mono-label px-2 text-white/25 transition-colors duration-300 hover:text-white/70 md:px-6 ${
+                    i === pipeline.length - 1 ? "text-[var(--accent)]/70 hover:text-[var(--accent)]" : ""
+                  }`}
+                >
+                  {stage}
+                </a>
+                {i < pipeline.length - 1 && (
+                  <span className="hidden text-white/[0.12] md:block">→</span>
+                )}
+              </div>
+            ))}
+            <span className="mono-label hidden pl-8 text-white/[0.12] lg:block">
+              One system, end to end
             </span>
-          </a>
+          </div>
         </div>
-
       </div>
     </section>
   );

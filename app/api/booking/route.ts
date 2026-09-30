@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -47,23 +45,34 @@ export async function POST(request: Request) {
 
     console.log("[vantix/booking] saved:", submission.id);
 
-    if (WEBHOOK_URL) {
-      fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessType: businessType ?? null,
-          fullName: name,
-          email,
-          phone: phone ?? null,
-          company: company ?? null,
-          website: website ?? null,
-          revenue: volume ?? budget ?? null,
-          message: message ?? null,
-        }),
-      }).catch((err) =>
-        console.error("[vantix/booking] webhook failed:", err)
-      );
+    const webhookUrl = process.env.N8N_WEBHOOK_URL;
+    if (webhookUrl) {
+      try {
+        console.log("[vantix/webhook] sending to n8n...");
+        const webhookRes = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessType: businessType ?? null,
+            fullName: name,
+            email,
+            phone: phone ?? null,
+            company: company ?? null,
+            website: website ?? null,
+            revenue: volume ?? budget ?? null,
+            message: message ?? null,
+          }),
+        });
+        console.log("[vantix/webhook] status:", webhookRes.status);
+        if (!webhookRes.ok) {
+          const text = await webhookRes.text();
+          console.error("[vantix/webhook] error response:", text);
+        }
+      } catch (webhookErr) {
+        console.error("[vantix/webhook] fetch failed:", webhookErr);
+      }
+    } else {
+      console.warn("[vantix/webhook] N8N_WEBHOOK_URL is not set");
     }
 
     return NextResponse.json({

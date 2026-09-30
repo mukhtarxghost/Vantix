@@ -1,91 +1,138 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-const links = [
-  { label: "Solutions", href: "/#solutions" },
-  { label: "Systems", href: "/#systems" },
-  { label: "Work", href: "/#work" },
-  { label: "Process", href: "/#process" },
+const navLinks = [
+  { label: "System", href: "#system", index: "01" },
+  { label: "Acquire", href: "#acquire", index: "02" },
+  { label: "Convert", href: "#convert", index: "03" },
+  { label: "Manage", href: "#manage", index: "04" },
+  { label: "Automate", href: "#automation", index: "05" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
 
-  const getHref = (href: string) => {
-    if (pathname === "/") {
-      return href.replace("/", "");
-    }
-    return href;
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full px-5 py-5 md:px-8">
-      <nav className="site-nav mx-auto flex max-w-[1600px] items-center justify-between border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-xl md:px-6">
-        <Link href="/" className="group flex items-center gap-1.5 text-lg font-semibold tracking-[-0.04em]">
-          <span>VANTIX</span>
-          <span className="text-white/30 transition-colors group-hover:text-emerald-400">.</span>
+    <header
+      className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "border-b border-white/[0.06] bg-[#050505]/85 backdrop-blur-xl"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
+      <div className="container flex h-16 items-center justify-between lg:h-[72px]">
+        {/* Logo */}
+        <Link href="/" className="flex items-baseline gap-0">
+          <span className="text-[16px] font-bold tracking-[-0.06em]">VANTIX</span>
+          <span className="text-[var(--accent)] text-[18px] font-light">.</span>
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
-          {links.map((link) => (
+        {/* Desktop Nav */}
+        <nav className="hidden items-center gap-1 lg:flex">
+          {navLinks.map((link) => (
             <a
               key={link.label}
-              href={getHref(link.href)}
-              className="relative text-[11px] font-mono uppercase tracking-[0.16em] text-white/50 transition-colors hover:text-white group py-1"
+              href={link.href}
+              className="group px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 transition-colors hover:text-white"
             >
+              <span className="mr-1.5 text-[8px] text-white/[0.14] transition-colors group-hover:text-[var(--accent)]/60">
+                {link.index}
+              </span>
               {link.label}
-              <span className="absolute bottom-0 left-0 h-px w-0 bg-white transition-all duration-300 group-hover:w-full" />
+            </a>
+          ))}
+        </nav>
+
+        {/* CTA */}
+        <div className="hidden items-center gap-3 lg:flex">
+          <Link
+            href="/book"
+            className="chamfer-button flex items-center gap-2 bg-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition-all hover:bg-[var(--accent)]"
+          >
+            Book a call
+            <ArrowUpRight size={11} strokeWidth={2.5} />
+          </Link>
+        </div>
+
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] text-white focus:outline-none lg:hidden"
+          aria-label={open ? "Close menu" : "Open menu"}
+        >
+          <span
+            className={`h-px w-5 bg-white transition-transform duration-300 ${
+              open ? "translate-y-[3px] rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-px w-5 bg-white transition-transform duration-300 ${
+              open ? "-translate-y-[3px] -rotate-45" : ""
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Mobile Overlay Menu */}
+      <div
+        className={`fixed inset-0 top-16 z-40 flex flex-col bg-[#050505] transition-opacity duration-300 lg:hidden ${
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div className="container flex flex-1 flex-col justify-center py-8">
+          {navLinks.map((link, i) => (
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="group flex items-baseline justify-between border-b border-white/[0.06] py-5"
+              style={{ transitionDelay: `${i * 30}ms` }}
+            >
+              <span className="flex items-baseline gap-4">
+                <span className="mono-label text-white/[0.16]">{link.index}</span>
+                <span className="text-3xl font-semibold tracking-[-0.04em] text-white/60 transition-colors group-hover:text-white">
+                  {link.label}
+                </span>
+              </span>
+              <ArrowUpRight
+                size={18}
+                className="text-white/[0.15] transition-colors group-hover:text-[var(--accent)]"
+              />
             </a>
           ))}
         </div>
 
-        <Link
-          href="/contact"
-          className="group hidden items-center gap-2 border border-white/20 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.14em] transition-all hover:border-white hover:bg-white hover:text-black md:flex"
-        >
-          <span>Start a project</span>
-          <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </Link>
-
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-white md:hidden p-1 focus:outline-none"
-          aria-label="Toggle menu"
-        >
-          {open ? <X size={21} /> : <Menu size={21} />}
-        </button>
-      </nav>
-
-      {open && (
-        <div className="mx-auto mt-2 max-w-[1600px] border border-white/10 bg-black/95 p-6 backdrop-blur-xl md:hidden">
-          <div className="flex flex-col gap-5">
-            {links.map((link) => (
-              <a
-                key={link.label}
-                href={getHref(link.href)}
-                onClick={() => setOpen(false)}
-                className="text-xs font-mono uppercase tracking-[0.16em] text-white/70 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="mt-2 flex items-center justify-center gap-2 border border-white/20 px-4 py-3 text-center text-[11px] font-mono uppercase tracking-[0.14em] text-white bg-white/5"
-            >
-              <span>Start a project</span>
-              <ArrowUpRight size={14} />
-            </Link>
-          </div>
+        <div className="container pb-10">
+          <Link
+            href="/book"
+            onClick={() => setOpen(false)}
+            className="chamfer-button flex items-center justify-center gap-2 bg-white px-5 py-4 text-[10px] font-bold uppercase tracking-[0.14em] text-black"
+          >
+            Book a call
+            <ArrowUpRight size={12} strokeWidth={2.5} />
+          </Link>
+          <p className="mono-label mt-6 text-center text-white/[0.15]">
+            Customer growth platform — automated end to end
+          </p>
         </div>
-      )}
+      </div>
     </header>
   );
 }
